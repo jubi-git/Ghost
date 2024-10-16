@@ -137,7 +137,7 @@ describe('Acceptance: Authentication', function () {
             await fillIn('[data-test-input="password"]', 'password');
             await click('[data-test-button="sign-in"]');
 
-            expect(currentURL(), 'url after u+p submit').to.equal('/signin/verify');
+            expect(currentURL(), 'url after email+password submit').to.equal('/signin/verify');
 
             await fillIn('[data-test-input="token"]', 123456);
             await click('[data-test-button="verify"]');

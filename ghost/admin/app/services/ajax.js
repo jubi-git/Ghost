@@ -178,6 +178,23 @@ export function isEmailError(errorOrStatus, payload) {
     }
 }
 
+/* 2FA required error */
+export class TwoFactorTokenRequired extends AjaxError {
+    constructor(payload) {
+        super(payload, '2nd factor verification is required to sign in.');
+    }
+}
+
+export function isTwoFactorTokenRequired(errorOrStatus, payload) {
+    const tokenRequiredCode = '2FA_TOKEN_REQUIRED';
+
+    if (isAjaxError(errorOrStatus)) {
+        return errorOrStatus instanceof TwoFactorTokenRequired || getErrorCode(errorOrStatus) === tokenRequiredCode;
+    } else {
+        return get(payload || {}, 'errors.firstObject.code') === tokenRequiredCode;
+    }
+}
+
 /* end: custom error types */
 
 export class AcceptedResponse {
@@ -318,7 +335,9 @@ class ajaxService extends AjaxService {
             }
         }
 
-        if (this.isVersionMismatchError(status, headers, payload)) {
+        if (this.isTwoFactorTokenRequiredError(status, headers, payload)) {
+            return new TwoFactorTokenRequired(payload);
+        } else if (this.isVersionMismatchError(status, headers, payload)) {
             return new VersionMismatchError(payload);
         } else if (this.isServerUnreachableError(status, headers, payload)) {
             return new ServerUnreachableError(payload);
@@ -376,6 +395,10 @@ class ajaxService extends AjaxService {
         }
 
         return super.normalizeErrorResponse(status, headers, payload);
+    }
+
+    isTwoFactorTokenRequiredError(status, headers, payload) {
+        return isTwoFactorTokenRequired(status, payload);
     }
 
     isVersionMismatchError(status, headers, payload) {
