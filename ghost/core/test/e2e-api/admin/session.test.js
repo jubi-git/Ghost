@@ -145,7 +145,7 @@ describe('Sessions API', function () {
                 });
 
             const email = assert.sentEmail({
-                subject: /[0-9]{6} is your ghost signin verification code/
+                subject: /[0-9]{6} is your Ghost sign in verification code/
             });
 
             const token = email.subject.match(/[0-9]{6}/)[0];
