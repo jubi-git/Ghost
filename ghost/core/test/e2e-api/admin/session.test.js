@@ -2,7 +2,7 @@ const {agentProvider, fixtureManager, matchers} = require('../../utils/e2e-frame
 const {mockLabsEnabled, mockLabsDisabled, mockMail, assert, restore} = require('../../utils/e2e-framework-mock-manager');
 const {anyContentVersion, anyEtag, anyErrorId, stringMatching, anyISODateTime, anyUuid} = matchers;
 
-describe.only('Sessions API', function () {
+describe('Sessions API', function () {
     let agent;
 
     before(async function () {
