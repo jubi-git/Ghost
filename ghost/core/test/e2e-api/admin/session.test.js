@@ -141,7 +141,10 @@ describe('Sessions API', function () {
                 })
                 .matchHeaderSnapshot({
                     'content-version': anyContentVersion,
-                    etag: anyEtag
+                    etag: anyEtag,
+                    'set-cookie': [
+                        stringMatching(/^ghost-admin-api-session=/)
+                    ]
                 });
 
             const email = assert.sentEmail({
