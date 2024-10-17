@@ -179,17 +179,27 @@ export function isEmailError(errorOrStatus, payload) {
 }
 
 /* 2FA required error */
-export class TwoFactorTokenRequired extends AjaxError {
+export class TwoFactorTokenRequiredError extends AjaxError {
     constructor(payload) {
         super(payload, '2nd factor verification is required to sign in.');
     }
 }
 
-export function isTwoFactorTokenRequired(errorOrStatus, payload) {
+export function isTwoFactorTokenRequiredError(errorOrStatus, payload) {
     const tokenRequiredCode = '2FA_TOKEN_REQUIRED';
 
+    // ember-simple-auth prevents ember-ajax parsing response as JSON but
+    // we need a JSON object to test against
+    if (typeof payload === 'string') {
+        try {
+            payload = JSON.parse(payload);
+        } catch (e) {
+            // do nothing
+        }
+    }
+
     if (isAjaxError(errorOrStatus)) {
-        return errorOrStatus instanceof TwoFactorTokenRequired || getErrorCode(errorOrStatus) === tokenRequiredCode;
+        return errorOrStatus instanceof TwoFactorTokenRequiredError || getErrorCode(errorOrStatus) === tokenRequiredCode;
     } else {
         return get(payload || {}, 'errors.firstObject.code') === tokenRequiredCode;
     }
@@ -336,7 +346,7 @@ class ajaxService extends AjaxService {
         }
 
         if (this.isTwoFactorTokenRequiredError(status, headers, payload)) {
-            return new TwoFactorTokenRequired(payload);
+            return new TwoFactorTokenRequiredError(payload);
         } else if (this.isVersionMismatchError(status, headers, payload)) {
             return new VersionMismatchError(payload);
         } else if (this.isServerUnreachableError(status, headers, payload)) {
@@ -398,7 +408,7 @@ class ajaxService extends AjaxService {
     }
 
     isTwoFactorTokenRequiredError(status, headers, payload) {
-        return isTwoFactorTokenRequired(status, payload);
+        return isTwoFactorTokenRequiredError(status, payload);
     }
 
     isVersionMismatchError(status, headers, payload) {
