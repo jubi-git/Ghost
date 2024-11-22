@@ -12,7 +12,9 @@ import MainNavigation from './navigation/MainNavigation';
 import NiceModal from '@ebay/nice-modal-react';
 import ViewProfileModal from './global/ViewProfileModal';
 
-import {useSearchForUser, useSuggestedProfiles} from '../hooks/useActivityPubQueries';
+import Separator from './global/Separator';
+import useSuggestedProfiles from '../hooks/useSuggestedProfiles';
+import {useSearchForUser} from '../hooks/useActivityPubQueries';
 
 interface SearchResultItem {
     actor: ActorProperties;
@@ -103,21 +105,25 @@ const SuggestedAccounts: React.FC<{
                     <LoadingIndicator size='md'/>
                 </div>
             )}
-            {profiles.map(profile => (
-                <SearchResult
-                    key={profile.actor.id}
-                    result={profile}
-                    update={onUpdate}
-                />
-            ))}
+            {profiles.map((profile, index) => {
+                return (
+                    <React.Fragment key={profile.actor.id}>
+                        <SearchResult
+                            key={profile.actor.id}
+                            result={profile}
+                            update={onUpdate}
+                        />
+                        {index < profiles.length - 1 && <Separator />}
+                    </React.Fragment>
+                );
+            })}
         </>
     );
 };
 
 const Search: React.FC<SearchProps> = ({}) => {
     // Initialise suggested profiles
-    const {suggestedProfilesQuery, updateSuggestedProfile} = useSuggestedProfiles('index', ['@index@activitypub.ghost.org', '@index@john.onolan.org', '@index@coffeecomplex.ghost.io', '@index@codename-jimmy.ghost.io', '@index@syphoncontinuity.ghost.io']);
-    const {data: suggested = [], isLoading: isLoadingSuggested} = suggestedProfilesQuery;
+    const {suggested, isLoadingSuggested, updateSuggestedProfile} = useSuggestedProfiles(6);
 
     // Initialise search query
     const queryInputRef = useRef<HTMLInputElement>(null);
@@ -141,8 +147,8 @@ const Search: React.FC<SearchProps> = ({}) => {
     return (
         <>
             <MainNavigation page='search' />
-            <div className='z-0 flex w-full flex-col items-center pt-8'>
-                <div className='relative flex w-full max-w-[560px] items-center '>
+            <div className='z-0 mx-auto flex w-full max-w-[560px] flex-col items-center pt-8'>
+                <div className='relative flex w-full items-center'>
                     <Icon className='absolute left-3 top-3 z-10' colorClass='text-grey-500' name='magnifying-glass' size='sm' />
                     <TextField
                         className='mb-6 mr-12 flex h-10 w-full items-center rounded-lg border border-transparent bg-grey-100 px-[33px] py-1.5 transition-colors focus:border-green focus:bg-white focus:outline-2 dark:border-transparent dark:bg-grey-925 dark:text-white dark:placeholder:text-grey-800 dark:focus:border-green dark:focus:bg-grey-950 tablet:mr-0'
@@ -172,22 +178,22 @@ const Search: React.FC<SearchProps> = ({}) => {
                     )}
                 </div>
                 {showLoading && <LoadingIndicator size='lg'/>}
-                
+
                 {showNoResults && (
                     <NoValueLabel icon='user'>
                         No users matching this username
                     </NoValueLabel>
                 )}
-                
+
                 {!showLoading && !showNoResults && (
-                    <SearchResults 
-                        results={results as SearchResultItem[]} 
+                    <SearchResults
+                        results={results as SearchResultItem[]}
                         onUpdate={updateResult}
                     />
                 )}
-                
+
                 {showSuggested && (
-                    <SuggestedAccounts 
+                    <SuggestedAccounts
                         isLoading={isLoadingSuggested}
                         profiles={suggested as SearchResultItem[]}
                         onUpdate={updateSuggestedProfile}
